@@ -26,9 +26,14 @@ public class Atlantis extends Application implements EventHandler<InputEvent>
 	Image Bullet;
 	AnimateObjects animate;
 	Boolean hit = false;
-	private ArrayList <Integer> bullets = new ArrayList<Integer>();
-	private ArrayList <Integer> chaacters = new ArrayList<Integer>();
-	boolean goNorth,goSouth,goEast,goWest,throwing;
+	int bulletNum = 0;
+	int [] bulletX = new int[10];
+	int [] bulletY = new int[10];
+	boolean [] isShot = new boolean[10];
+	int gunX = 464;
+	int gunY = 420;
+	Thread thread = new Thread();
+
 public static void main(String[] args)
 {
 launch();
@@ -36,11 +41,24 @@ launch();
 
 public void handle(final InputEvent event){
 	if(((KeyEvent)event).getCode() == KeyCode.SPACE){
-		y+=1;
+		isShot[bulletNum] = true;
+		bulletX[bulletNum] = gunX + 50;
+		bulletY[bulletNum] = gunY + 10;
+		bulletNum ++;
+
+		if(bulletNum > bulletX.length - 1){
+			bulletNum = 0;
+		}
 	}
-	if (event instanceof KeyEvent){
-		if (((KeyEvent)event).getCode() == KeyCode.SPACE )
-			y+=1;
+
+	if (((KeyEvent)event).getCode() == KeyCode.UP ){
+		gunY -= 15;
+		bulletY[bulletNum] = gunY;
+	}
+
+	if (((KeyEvent)event).getCode() == KeyCode.DOWN ){
+		gunY += 15;
+		bulletY[bulletNum] = gunY;
 	}
 
 
@@ -63,6 +81,7 @@ public void start(Stage stage)
 	gc.drawImage(AtlantisGameHome,0,-2);
 	Bullet = new Image("Bullet.jpg");
 	gc.drawImage(Bullet,0,1);
+	thread.start();
 	animate = new AnimateObjects();
 	animate.start();
 	stage.show();
@@ -71,13 +90,35 @@ public void start(Stage stage)
 
 public class AnimateObjects extends AnimationTimer{
 
-	public void handle(long now) {
+	public void handle(long now){
 
 		gc.drawImage(AtlantisGameHome,x,100);
+			for(int i = 0; i < bulletX.length;i ++){
+				if(isShot[i]){
+					gc.drawImage(Bullet,bulletX[i],bulletY[i]);
+				}
+			}
 		gc.drawImage(Bullet,x+464,420);
 
+		while(true){
+			for(int i = 0; i < bulletX.length;i++){
+				if(isShot[i] ){
+					bulletX[i] += 20;
+				}
+				if(bulletX[i] > 500){
+				isShot[i] = false;
+				bulletX[i] = gunX + 50;
+				bulletY[i] = gunY + 10;
+			}
+			}
+			try{
+				Thread.sleep(20);
+			}
+			catch(InterruptedException e){
+				gc.drawImage(Bullet,x+464,420);
+			}
 
-
+	}
 	}
 
 
